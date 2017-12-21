@@ -1,0 +1,26 @@
+{
+  "name": "atomic-synth",
+  "version": "1.0.0",
+  "description": "A virtual keyboard featuring multiple concurrent instruments",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "electron": "electron .",
+    "react": "npm run --prefix ./app start",
+    "both": "concurrently -c \"cyan\" -n \"Electron,React\" \"electron .\" \"npm run --prefix ./app start\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/concatto/atomic-synth.git"
+  },
+  "author": "Fernando Concatto",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/concatto/atomic-synth/issues"
+  },
+  "homepage": "https://github.com/concatto/atomic-synth#readme",
+  "dependencies": {
+    "electron": "1.7.10",
+    "soundfont-player": "^0.10.6"
+  }
+}
