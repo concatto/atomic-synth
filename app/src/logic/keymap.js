@@ -11,3 +11,7 @@ keyboard.split("").forEach((key, index) => map[key] = index);
 export function indexOf(key) {
   return map[key.toLowerCase()];
 }
+
+export function keys() {
+  return Object.keys(map);
+}

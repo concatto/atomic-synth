@@ -1,29 +1,46 @@
 import React, { Component } from 'react';
 import logo from './logo.svg';
-import { play, release, load, names } from './logic/media';
+import MediaController, { names } from './logic/media';
 import { indexOf } from './logic/keymap';
 import { toNote } from './logic/notes';
+import Keyboard from './components/Keyboard';
 import './App.css';
 
 class App extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      notes: []
+    };
+
+    this.controller = new MediaController();
+    this.controller.on("changed", notes => this.setState({notes}));
+    window.controller = this.controller;
+  }
+
   createInstruments() {
     return names.map((instrument, i) => (
-      <li onClick={() => load(instrument).then(console.log)} key={i}>
+      <li onClick={() => this.controller.load(instrument).then(alert)} key={i}>
         {instrument}
       </li>
     ));
   }
 
-  eventToNote(event) {
-    return toNote(indexOf(event.key), event.shiftKey);
+  convertAndApply(event, func) {
+    const index = indexOf(event.key);
+
+    if (index !== undefined) {
+      func(toNote(index, event.shiftKey));
+    }
   }
 
   handlePress(e) {
-    play(this.eventToNote(e));
+    this.convertAndApply(e, note => this.controller.play(note));
   }
 
   handleRelease(e) {
-    release(this.eventToNote(e));
+    this.convertAndApply(e, note => this.controller.release(note));
   }
 
   componentDidMount() {
@@ -35,9 +52,12 @@ class App extends Component {
     return (
       <div className="App">
         <header className="App-header">
-          <img onClick={() => play("C4")} src={logo} className="App-logo" alt="logo" />
           <h1 className="App-title">Welcome to React</h1>
         </header>
+        <Keyboard/>
+        <div>
+          {this.state.notes.toString()}
+        </div>
         <ul>
           {this.createInstruments()}
         </ul>
