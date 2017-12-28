@@ -11,27 +11,32 @@ class App extends Component {
     super(props);
 
     this.state = {
-      notes: []
+      notes: [],
+      instruments: [],
+      instrument: 0,
     };
 
     this.controller = new MediaController();
     this.controller.on("changed", notes => this.setState({notes}));
+    this.controller.on("instrumentsloaded", instruments => this.setState({instruments}));
+    this.controller.on("instrumentchanged", instrument => this.setState({instrument}));
     window.controller = this.controller;
   }
 
   createInstruments() {
-    return names.map((instrument, i) => (
-      <li onClick={() => this.controller.load(instrument).then(alert)} key={i}>
-        {instrument}
+    return this.state.instruments.map((instrument, i) => (
+      <li onClick={() => this.controller.changeInstrument(instrument.program)} key={i}>
+        {instrument.name}
       </li>
     ));
   }
 
   convertAndApply(event, func) {
     const index = indexOf(event.key);
+    const note = toNote(index, event.shiftKey);
 
-    if (index !== undefined) {
-      func(toNote(index, event.shiftKey));
+    if (note !== undefined) {
+      func(note);
     }
   }
 
@@ -49,14 +54,18 @@ class App extends Component {
   }
 
   render() {
+    const { instruments, instrument, notes } = this.state;
+    const inst = instruments[instrument]
+
     return (
       <div className="App">
         <header className="App-header">
-          <h1 className="App-title">Welcome to React</h1>
+          <h1 className="App-title">Atomic Synth</h1>
         </header>
-        <Keyboard/>
+        <h3>{inst ? inst.name : "Loading"}</h3>
+        <Keyboard active={notes}/>
         <div>
-          {this.state.notes.toString()}
+          {notes.toString()}
         </div>
         <ul>
           {this.createInstruments()}

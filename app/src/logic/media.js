@@ -1,22 +1,83 @@
 import { asNatural, asSharp, toMidi } from './notes';
+import last from 'lodash/last';
 const sf = window.require('soundfont-player');
 const { exec } = window.require('child_process');
 const EventEmitter = window.require('events');
+
+const SFPATH = "/home/concatto/gu_gs.sf2";
 
 class MediaController extends EventEmitter {
   constructor() {
     super();
 
     this.activeNotes = {};
+    this.ready = false;
+    this.response = [];
     this.fsHandle = exec("fluidsynth -a alsa");
-    this.fsHandle.stdout.on("data", console.log);
-    this.fsHandle.stderr.on("data", console.log);
+    this.fsHandle.stdout.on("data", data => {
+      const parts = data.split("\n");
 
-    this.send("load /home/concatto/gu_gs.sf2");
+      for (const part of parts) {
+        if (part.startsWith("> ")) {
+          // A complete message just came through, emit it
+          this.emit("output", this.processResponse(this.response));
+
+          // And then clear it
+          this.response = [];
+
+          // Push back the remainder of the line
+          if (part.length > 2) {
+            this.response.push(part.substring(2));
+          }
+
+          // We're clear to send commands now
+          if (this.ready === false) {
+            this.emit("ready");
+            this.ready = true;
+          }
+        } else {
+          this.response.push(part);
+        }
+      }
+    });
+
+    this.on("ready", () => {
+      this.send(`load ${SFPATH}`).then(res => {
+        const id = res[0].match(/has ID (\d+)/)[1];
+
+        return this.send(`inst ${id}`);
+      }).then(res => {
+        this.emit("instrumentsloaded", this.processInstruments(res));
+      });
+    });
+  }
+
+  processInstruments(instruments) {
+    return instruments.map(inst => {
+      const matches = inst.match(/(\d+)\-(\d+)\s(.*)/);
+      if (matches && matches[3]) {
+        return {
+          bank: parseInt(matches[1], 10),
+          program: parseInt(matches[2], 10),
+          name: matches[3]
+        };
+      }
+
+      return null;
+    }).filter(el => el !== null && el.bank === 0);
+  }
+
+  processResponse(response) {
+    return response.filter(el => el.length > 0).slice(1);
   }
 
   send(message) {
+    const promise = new Promise((res, rej) => {
+      this.once("output", res);
+    });
+
     this.fsHandle.stdin.write(message + "\n");
+    return promise;
   }
 
   doRelease(note) {
@@ -55,7 +116,9 @@ class MediaController extends EventEmitter {
   }
 
   changeInstrument(id) {
-    this.send(`prog 0 ${id}`);
+    this.send(`prog 0 ${id}`).then(() => {
+      this.emit("instrumentchanged", id);
+    });
   }
 
   load(name) {

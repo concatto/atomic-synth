@@ -2,21 +2,36 @@ body {
   margin: 0;
   padding: 0;
   font-family: sans-serif;
+  box-sizing: border-box;
 }
 
 .keyboard {
   width: 300px;
   height: 100px;
   position: relative;
-  border: 1px solid black;
 }
 
 .key {
+  background-color: white;
   position: absolute;
+  border-top: 1px solid black;
+  border-bottom: 1px solid black;
+  border-left: 1px solid black;
   top: 0px;
   height: 100%;
 }
 
-.key:not(:last-of-type) {
+.key:last-of-type {
   border-right: 1px solid black;
+}
+
+.key.sharp {
+  background-color: #111111;
+  height: 50%;
+  z-index: 999;
+  border: 1px solid black;
+}
+
+.key.pressed {
+  background-color: #999999;
 }

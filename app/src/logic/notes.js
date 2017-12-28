@@ -10,11 +10,18 @@ const allNotes = [
 ];
 
 export function toNote(index, sharp = false, baseName = "C", baseOctave = 2) {
+  if (index === undefined) return undefined;
+
   const adjusted = index + names.indexOf(baseName);
   const name = names[adjusted % 7];
   const octave = Math.floor(adjusted / 7) + baseOctave;
 
-  return name + (sharp ? "#" : "") + String(octave);
+  const note = name + String(octave);
+  if (sharp && hasSharp(note)) {
+    return asSharp(note);
+  }
+
+  return note;
 }
 
 export function toMidi(note) {
@@ -26,17 +33,14 @@ export function toMidi(note) {
 
 export function asSharp(note) {
   if (note.indexOf("#") < 0) {
+    const octave = parseInt(note[note.length - 1], 10);
+
     if (note[0] === "B") {
       // B sharp is C natural
-      note[0] = "C";
-      note[note.length - 1] = parseInt(note[note.length - 1], 10) + 1;
-
-      return note;
+      return "C" + (octave + 1);
     } else if (note[0] === "E") {
       // E sharp is F natural
-      note[0] = "F";
-
-      return note;
+      return "F" + octave;
     }
 
     const arr = note.split("");
@@ -46,6 +50,10 @@ export function asSharp(note) {
   }
 
   return note;
+}
+
+export function hasSharp(note) {
+  return note[0] !== "B" && note[0] !== "E";
 }
 
 export function asNatural(note) {
