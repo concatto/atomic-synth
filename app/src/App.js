@@ -1,12 +1,17 @@
-import React, { Component } from 'react';
-import logo from './logo.svg';
+import React from 'react';
+import Grid from 'material-ui/Grid';
+import Paper from 'material-ui/Paper';
+import AppBar from 'material-ui/AppBar';
+import Toolbar from 'material-ui/Toolbar';
+import Typography from 'material-ui/Typography';
+import List, { ListItem, ListItemText } from 'material-ui/List';
 import MediaController, { names } from './logic/media';
 import { indexOf } from './logic/keymap';
 import { toNote } from './logic/notes';
 import Keyboard from './components/Keyboard';
 import './App.css';
 
-class App extends Component {
+class App extends React.Component {
   constructor(props) {
     super(props);
 
@@ -24,10 +29,12 @@ class App extends Component {
   }
 
   createInstruments() {
+    const change = (program) => this.controller.changeInstrument(program);
+
     return this.state.instruments.map((instrument, i) => (
-      <li onClick={() => this.controller.changeInstrument(instrument.program)} key={i}>
+      <Typography type="body1" onClick={() => change(instrument.program)} key={i}>
         {instrument.name}
-      </li>
+      </Typography>
     ));
   }
 
@@ -58,18 +65,27 @@ class App extends Component {
     const inst = instruments[instrument]
 
     return (
-      <div className="App">
-        <header className="App-header">
-          <h1 className="App-title">Atomic Synth</h1>
-        </header>
-        <h3>{inst ? inst.name : "Loading"}</h3>
-        <Keyboard active={notes}/>
-        <div>
-          {notes.toString()}
-        </div>
-        <ul>
-          {this.createInstruments()}
-        </ul>
+      <div className="root">
+        <AppBar position="static">
+          <Toolbar>
+            <Typography type="title" color="inherit" className="expand">
+              Atomic Synth
+            </Typography>
+          </Toolbar>
+        </AppBar>
+        <Grid container justify="center">
+          <Grid item xs={10}>
+            <div className="vcenter">
+              <h3>{inst ? inst.name : "Loading"}</h3>
+              <Keyboard active={notes} width={600}/>
+            </div>
+
+
+            <Paper>
+              {this.createInstruments()}
+            </Paper>
+          </Grid>
+        </Grid>
       </div>
     );
   }

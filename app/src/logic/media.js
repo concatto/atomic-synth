@@ -54,7 +54,7 @@ class MediaController extends EventEmitter {
 
   processInstruments(instruments) {
     return instruments.map(inst => {
-      const matches = inst.match(/(\d+)\-(\d+)\s(.*)/);
+      const matches = inst.match(/(\d+)-(\d+)\s(.*)/);
       if (matches && matches[3]) {
         return {
           bank: parseInt(matches[1], 10),

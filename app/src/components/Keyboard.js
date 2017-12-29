@@ -8,7 +8,7 @@ class Keyboard extends React.Component {
   createKeys() {
     const { active = [] } = this.props;
 
-    const width = 600;
+    const width = this.props.width;
     const keys = getKeys().length;
     const keyWidth = width / keys;
 
@@ -34,7 +34,7 @@ class Keyboard extends React.Component {
 
   render() {
     return (
-      <div className="keyboard">
+      <div className="keyboard" style={{width: this.props.width}}>
         {this.createKeys()}
       </div>
     );
