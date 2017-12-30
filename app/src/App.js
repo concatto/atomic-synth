@@ -17,21 +17,21 @@ class App extends React.Component {
 
     this.state = {
       notes: [],
+      availableInstruments: [],
       instruments: [],
-      instrument: 0,
     };
 
     this.controller = new MediaController();
     this.controller.on("changed", notes => this.setState({notes}));
-    this.controller.on("instrumentsloaded", instruments => this.setState({instruments}));
-    this.controller.on("instrumentchanged", instrument => this.setState({instrument}));
+    this.controller.on("instrumentsloaded", availableInstruments => this.setState({availableInstruments}));
+    this.controller.on("instrumentschanged", instruments => this.setState({instruments}));
     window.controller = this.controller;
   }
 
   createInstruments() {
     const change = (program) => this.controller.changeInstrument(program);
 
-    return this.state.instruments.map((instrument, i) => (
+    return this.state.availableInstruments.map((instrument, i) => (
       <Typography type="body1" onClick={() => change(instrument.program)} key={i}>
         {instrument.name}
       </Typography>
@@ -61,8 +61,7 @@ class App extends React.Component {
   }
 
   render() {
-    const { instruments, instrument, notes } = this.state;
-    const inst = instruments[instrument]
+    const { availableInstruments, instruments, notes } = this.state;
 
     return (
       <div className="root">
@@ -76,7 +75,11 @@ class App extends React.Component {
         <Grid container justify="center">
           <Grid item xs={10}>
             <div className="vcenter">
-              <h3>{inst ? inst.name : "Loading"}</h3>
+              {instruments.map((val, i) => (
+                <Typography type="headline" key={i}>
+                  {availableInstruments[val].name}
+                </Typography>
+              ))}
               <Keyboard active={notes} width={600}/>
             </div>
 

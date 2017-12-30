@@ -11,6 +11,8 @@ class MediaController extends EventEmitter {
     super();
 
     this.activeNotes = {};
+    this.instruments = [];
+    this.suppressed = false;
     this.ready = false;
     this.response = [];
     this.fsHandle = exec("fluidsynth -a alsa");
@@ -48,6 +50,7 @@ class MediaController extends EventEmitter {
         return this.send(`inst ${id}`);
       }).then(res => {
         this.emit("instrumentsloaded", this.processInstruments(res));
+        this.addInstrument(0);
       });
     });
   }
@@ -83,7 +86,9 @@ class MediaController extends EventEmitter {
   doRelease(note) {
     //console.log("Trying to release", note);
     if (this.activeNotes[note] !== undefined) {
-      this.send(`noteoff 0 ${toMidi(note)}`);
+      for (let i = 0; i < this.instruments.length; i++) {
+        this.send(`noteoff ${i} ${toMidi(note)}`);
+      }
 
       delete this.activeNotes[note];
       this.emitChanged();
@@ -100,9 +105,11 @@ class MediaController extends EventEmitter {
 
   play(note) {
     if (this.canPlay(note)) {
-      this.send(`noteon 0 ${toMidi(note)} 127`);
-      this.activeNotes[note] = 127;
+      for (let i = 0; i < this.instruments.length; i++) {
+        this.send(`noteon ${i} ${toMidi(note)} 127`);
+      }
 
+      this.activeNotes[note] = 127;
       this.emitChanged();
     }
   }
@@ -115,10 +122,29 @@ class MediaController extends EventEmitter {
     }
   }
 
-  changeInstrument(id) {
-    this.send(`prog 0 ${id}`).then(() => {
-      this.emit("instrumentchanged", id);
+  changeInstrument(id, channel = 0) {
+    this.send(`prog ${channel} ${id}`).then(() => {
+      this.instruments[channel] = id;
+      this.emit("instrumentschanged", this.instruments);
     });
+  }
+
+  addInstrument(id) {
+    this.instruments.push(id);
+    this.changeInstrument(id, this.instruments.length - 1);
+  }
+
+  removeInstrument(index) {
+    this.supressed = true;
+    this.instruments.splice(index, 1);
+
+    for (let i = index; i < this.instruments.length; i++) {
+      if (i === this.instruments.length - 1) {
+        this.supressed = false;
+      }
+
+      this.changeInstrument(this.instruments[i], i);
+    }
   }
 
   load(name) {
@@ -135,7 +161,9 @@ class MediaController extends EventEmitter {
   }
 
   emitChanged() {
-    this.emit("changed", Object.keys(this.activeNotes));
+    if (!this.suppressed) {
+      this.emit("changed", Object.keys(this.activeNotes));
+    }
   }
 }
 
