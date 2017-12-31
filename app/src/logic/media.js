@@ -4,7 +4,7 @@ const sf = window.require('soundfont-player');
 const { exec } = window.require('child_process');
 const EventEmitter = window.require('events');
 
-const SFPATH = "/home/concatto/gu_gs.sf2";
+const SFPATH = "/home/concatto/genusrmusescore.sf2";
 
 class MediaController extends EventEmitter {
   constructor() {
@@ -168,4 +168,3 @@ class MediaController extends EventEmitter {
 }
 
 export default MediaController;
-export const names = window.require('soundfont-player/names/musyngkite.json');
