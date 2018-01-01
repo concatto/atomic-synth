@@ -9,7 +9,7 @@ const allNotes = [
   "B"
 ];
 
-export function toNote(index, sharp = false, baseName = "C", baseOctave = 2) {
+export function toNote(index, sharp = false, baseName = "C", baseOctave = 3) {
   if (index === undefined) return undefined;
 
   const adjusted = index + names.indexOf(baseName);

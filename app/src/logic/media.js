@@ -1,4 +1,5 @@
 import { asNatural, asSharp, toMidi } from './notes';
+import { observable, computed } from 'mobx';
 import last from 'lodash/last';
 const sf = window.require('soundfont-player');
 const { exec } = window.require('child_process');
@@ -7,11 +8,13 @@ const EventEmitter = window.require('events');
 const SFPATH = "/home/concatto/genusrmusescore.sf2";
 
 class MediaController extends EventEmitter {
+  @observable availableInstruments = [];
+  @observable instruments = [];
+
   constructor() {
     super();
 
     this.activeNotes = {};
-    this.instruments = [];
     this.suppressed = false;
     this.ready = false;
     this.response = [];
@@ -49,7 +52,7 @@ class MediaController extends EventEmitter {
 
         return this.send(`inst ${id}`);
       }).then(res => {
-        this.emit("instrumentsloaded", this.processInstruments(res));
+        this.availableInstruments = this.processInstruments(res);
         this.addInstrument(0);
       });
     });
@@ -125,7 +128,6 @@ class MediaController extends EventEmitter {
   changeInstrument(id, channel = 0) {
     this.send(`prog ${channel} ${id}`).then(() => {
       this.instruments[channel] = id;
-      this.emit("instrumentschanged", this.instruments);
     });
   }
 
@@ -135,35 +137,21 @@ class MediaController extends EventEmitter {
   }
 
   removeInstrument(index) {
-    this.supressed = true;
     this.instruments.splice(index, 1);
 
     for (let i = index; i < this.instruments.length; i++) {
-      if (i === this.instruments.length - 1) {
-        this.supressed = false;
-      }
-
       this.changeInstrument(this.instruments[i], i);
     }
-  }
-
-  load(name) {
-    // const options = {
-    //   soundfont: "MusingKyte",
-    //   format: "ogg",
-    //   gain: 10,
-    // };
-    //
-    // return sf.instrument(this.ac, name, options).then(value => {
-    //   this.instrument = value;
-    //   return value;
-    // });
   }
 
   emitChanged() {
     if (!this.suppressed) {
       this.emit("changed", Object.keys(this.activeNotes));
     }
+  }
+
+  @computed get detailedInstruments() {
+    return this.instruments.map(inst => this.availableInstruments[inst]);
   }
 }
 
