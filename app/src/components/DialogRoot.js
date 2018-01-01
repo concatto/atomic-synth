@@ -5,10 +5,12 @@ import { observer } from 'mobx-react';
 class DialogStore {
   @observable currentDialog = "";
   @observable isOpen = false;
+  @observable dialogProps = {};
 
-  open(dialog) {
+  open(dialog, dialogProps = {}) {
     this.isOpen = true;
     this.currentDialog = dialog;
+    this.dialogProps = dialogProps;
   }
 
   close() {
@@ -37,7 +39,9 @@ class DialogRoot extends React.Component {
 
     // Inject the necessary props into the dialog
     return React.cloneElement(dialog, {
+      ...store.dialogProps,
       onClose: () => store.close(),
+      onExited: () => store.currentDialog = "",
       open: store.isOpen,
     });
   }

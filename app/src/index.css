@@ -16,7 +16,13 @@ body {
   flex-direction: column;
 }
 
+.hcenter {
+  display: flex;
+  align-items: center;
+}
+
 .keyboard {
+  margin: 32px 0px;
   width: 300px;
   height: 100px;
   position: relative;

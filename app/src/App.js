@@ -1,11 +1,13 @@
 import React from 'react';
 import NewIcon from 'material-ui-icons/Add';
+import EditIcon from 'material-ui-icons/Edit';
 import Grid from 'material-ui/Grid';
 import Paper from 'material-ui/Paper';
 import Button from 'material-ui/Button';
 import AppBar from 'material-ui/AppBar';
 import Toolbar from 'material-ui/Toolbar';
 import Typography from 'material-ui/Typography';
+import IconButton from 'material-ui/IconButton';
 import List, { ListItem, ListItemText } from 'material-ui/List';
 import MediaController, { names } from './logic/media';
 import { indexOf } from './logic/keymap';
@@ -63,9 +65,21 @@ class App extends React.Component {
     document.addEventListener("keyup", e => this.handleRelease(e));
   }
 
-  handleInstrumentChange(instrument) {
-    dialogStore.close();
-    this.controller.changeInstrument(instrument.program);
+  openInstrument(callback) {
+    dialogStore.open("INSTRUMENT", {
+      onComplete: (result) => {
+        dialogStore.close();
+        callback(result);
+      }
+    });
+  }
+
+  openChangeInstrument(index) {
+    this.openInstrument(inst => this.controller.changeInstrument(inst.program, index));
+  }
+
+  openNewInstrument() {
+    this.openInstrument(inst => this.controller.addInstrument(inst.program));
   }
 
   render() {
@@ -83,24 +97,32 @@ class App extends React.Component {
 
         <DialogRoot>
           <InstrumentDialog name="INSTRUMENT"
-            onComplete={val => this.handleInstrumentChange(val)}
             instruments={this.controller.availableInstruments}/>
         </DialogRoot>
 
         <Grid container justify="center">
           <Grid item xs={10}>
-            <div className="vcenter">
-              {this.controller.detailedInstruments.map((inst, i) => (
-                <Typography type="headline" key={i}>
-                  {inst.name}
-                </Typography>
-              ))}
-              <Keyboard active={notes} width={600}/>
+            <Keyboard active={notes} width={600}/>
+            
+            <div className="hcenter">
+              <Typography type="title" className="expand">
+                Instruments ({this.controller.instruments.length}/15)
+              </Typography>
+              <Button color="primary" onClick={() => this.openNewInstrument()}>
+                Add new instrument
+              </Button>
             </div>
 
-            <Button fab mini color="primary" onClick={() => dialogStore.open("INSTRUMENT")}>
-              <NewIcon/>
-            </Button>
+            {this.controller.detailedInstruments.map((inst, i) => (
+              <div className="hcenter" key={i}>
+                <Typography type="subheading">
+                  {inst.name}
+                </Typography>
+                <IconButton color="accent" onClick={() => this.openChangeInstrument(i)}>
+                  <EditIcon/>
+                </IconButton>
+              </div>
+            ))}
           </Grid>
         </Grid>
       </div>

@@ -9,6 +9,11 @@ const section = (name, lower, upper) => ({name, lower, upper});
 const sections = [
   section("Piano", 0, 8),
   section("Chromatic", 8, 16),
+  section("Organ", 16, 24),
+  section("Guitar", 24, 32),
+  section("Bass", 32, 40),
+  section("Strings", 40, 48),
+  section("Ensemble", 48, 56),
 ];
 
 class InstrumentDialog extends React.Component {
@@ -47,7 +52,11 @@ class InstrumentDialog extends React.Component {
       <Dialog onClose={onClose} open={open}>
         <DialogTitle>Choose an instrument</DialogTitle>
         <div>
-          <Tabs value={tabIndex} onChange={(e, tabIndex) => this.setState({tabIndex})}>
+          <Tabs value={tabIndex}
+            indicatorColor="primary"
+            textColor="primary"
+            onChange={(e, tabIndex) => this.setState({tabIndex})}
+          >
             {this.createTabs()}
           </Tabs>
 
