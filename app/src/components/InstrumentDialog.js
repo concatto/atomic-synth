@@ -14,6 +14,9 @@ const sections = [
   section("Bass", 32, 40),
   section("Strings", 40, 48),
   section("Ensemble", 48, 56),
+  section("Brass", 56, 64),
+  section("Reed", 64, 72),
+  section("Pipe", 72, 80),
 ];
 
 class InstrumentDialog extends React.Component {
@@ -46,13 +49,14 @@ class InstrumentDialog extends React.Component {
 
   render() {
     const { tabIndex } = this.state;
-    const { onClose, open } = this.props;
+    const { onClose, onExited, open } = this.props;
 
     return (
-      <Dialog onClose={onClose} open={open}>
+      <Dialog onClose={onClose} onExited={onExited} open={open}>
         <DialogTitle>Choose an instrument</DialogTitle>
         <div>
-          <Tabs value={tabIndex}
+          <Tabs value={tabIndex} scrollable
+            scrollButtons="auto"
             indicatorColor="primary"
             textColor="primary"
             onChange={(e, tabIndex) => this.setState({tabIndex})}
